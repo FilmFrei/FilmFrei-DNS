@@ -1,0 +1,802 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>FilmFrei: DNS-Lösung bei Anbietersperre</title>
+<style>
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+}
+
+body {
+  background-color: #121212;
+  color: #f5f5f5;
+  overflow-x: hidden;
+  padding-top: 70px;
+}
+
+header {
+  position: sticky;
+  top: 0;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 20px 40px;
+  background-color: rgba(18, 18, 18, .95);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  z-index: 100;
+  border-bottom: 1px solid rgba(255, 255, 255, .05);
+}
+
+.logo-container {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+}
+
+.brand-name {
+  font-size: 24px;
+  font-weight: 600;
+  letter-spacing: -.5px;
+}
+
+main {
+  padding: 40px;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.page-title {
+  font-size: 32px;
+  font-weight: 700;
+  margin-bottom: 30px;
+  text-align: center;
+  color: #0a84ff;
+}
+
+.device-selection {
+  display: flex;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 15px;
+  margin-bottom: 40px;
+}
+
+.device-button {
+  background-color: #1e1e1e;
+  color: #f5f5f5;
+  border: none;
+  border-radius: 10px;
+  padding: 15px 20px;
+  font-size: 16px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.device-button:hover {
+  background-color: #2a2a2a;
+  transform: translateY(-2px);
+}
+
+.device-button.active {
+  background-color: #0a84ff;
+  box-shadow: 0 0 15px rgba(10, 132, 255, .3);
+}
+
+.device-icon {
+  font-size: 24px;
+  margin-right: 8px;
+  vertical-align: middle;
+}
+
+.solution-section {
+  background-color: #1a1a1a;
+  border-radius: 15px;
+  padding: 30px;
+  margin-bottom: 40px;
+  box-shadow: 0 5px 20px rgba(0, 0, 0, .3);
+}
+
+.section-title {
+  font-size: 24px;
+  font-weight: 600;
+  margin-bottom: 20px;
+  color: #0a84ff;
+}
+
+.app-info {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 30px;
+  margin-bottom: 30px;
+}
+
+.app-image {
+  flex: 0 0 120px;
+  height: 120px;
+  border-radius: 24px;
+  overflow: hidden;
+}
+
+.app-image img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.app-details {
+  flex: 1;
+  min-width: 300px;
+}
+
+.app-name {
+  font-size: 22px;
+  font-weight: 600;
+  margin-bottom: 10px;
+}
+
+.app-description {
+  color: #ddd;
+  line-height: 1.6;
+  margin-bottom: 15px;
+}
+
+.store-buttons {
+  display: flex;
+  gap: 15px;
+  margin-top: 15px;
+}
+
+.store-button {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background-color: #2a2a2a;
+  color: #fff;
+  text-decoration: none;
+  padding: 10px 15px;
+  border-radius: 10px;
+  font-weight: 500;
+  transition: all 0.3s ease;
+}
+
+.store-button:hover {
+  background-color: #3a3a3a;
+  transform: translateY(-2px);
+}
+
+.store-icon {
+  width: 24px;
+  height: 24px;
+}
+
+.device-content {
+  display: none;
+}
+
+.device-content.active {
+  display: block;
+}
+
+.instruction-list {
+  list-style-type: none;
+  counter-reset: inst-counter;
+}
+
+.instruction-list li {
+  position: relative;
+  padding: 15px 0 15px 50px;
+  border-bottom: 1px solid rgba(255, 255, 255, .1);
+  counter-increment: inst-counter;
+}
+
+.instruction-list li::before {
+  content: counter(inst-counter);
+  position: absolute;
+  left: 0;
+  top: 15px;
+  width: 36px;
+  height: 36px;
+  background-color: #0a84ff;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 600;
+}
+
+.instruction-list li:last-child {
+  border-bottom: none;
+}
+
+.instruction-image {
+  max-width: 100%;
+  margin: 20px 0;
+  border-radius: 10px;
+  box-shadow: 0 5px 15px rgba(0, 0, 0, .4);
+}
+
+.dns-values {
+  background-color: #2a2a2a;
+  padding: 15px;
+  border-radius: 10px;
+  margin: 20px 0;
+  font-family: 'Courier New', monospace;
+}
+
+.dns-value {
+  display: flex;
+  justify-content: space-between;
+  padding: 8px 0;
+}
+
+.dns-value:not(:last-child) {
+  border-bottom: 1px solid rgba(255, 255, 255, .1);
+}
+
+.dns-label {
+  color: #0a84ff;
+}
+
+.dns-address {
+  background-color: #333;
+  padding: 2px 8px;
+  border-radius: 4px;
+}
+
+.note {
+  background-color: rgba(10, 132, 255, .1);
+  border-left: 4px solid #0a84ff;
+  padding: 15px;
+  border-radius: 0 10px 10px 0;
+  margin: 20px 0;
+}
+
+.note-title {
+  font-weight: 600;
+  margin-bottom: 5px;
+  color: #0a84ff;
+}
+
+footer {
+  text-align: center;
+  padding: 30px;
+  color: #999;
+  font-size: 14px;
+  border-top: 1px solid rgba(255, 255, 255, .05);
+}
+
+.back-button {
+  display: inline-block;
+  background-color: #0a84ff;
+  color: white;
+  padding: 10px 20px;
+  border-radius: 10px;
+  text-decoration: none;
+  margin-top: 20px;
+  transition: all 0.3s ease;
+}
+
+.back-button:hover {
+  background-color: #0071e3;
+  transform: translateY(-2px);
+}
+
+@media (max-width: 768px) {
+  header {
+    padding: 15px 20px;
+  }
+
+  main {
+    padding: 20px;
+  }
+
+  .page-title {
+    font-size: 26px;
+  }
+
+  .app-info {
+    flex-direction: column;
+  }
+
+  .app-image {
+    margin: 0 auto;
+  }
+
+  .store-buttons {
+    flex-direction: column;
+  }
+}
+
+</style>
+</head>
+<body>
+  <header>
+    <div class="logo-container">
+      <div class="brand-name">FilmFrei</div>
+    </div>
+  </header>
+
+  <main>
+    <h1 class="page-title">DNS-Einstellungen ändern: Umgehen von Anbieter-Sperren</h1>
+    
+    <div class="device-selection">
+      <button class="device-button active" data-device="app">
+        <span class="device-icon">📱</span>App (Einfachste Lösung)
+      </button>
+      <button class="device-button" data-device="windows">
+        <span class="device-icon">💻</span>Windows
+      </button>
+      <button class="device-button" data-device="mac">
+        <span class="device-icon">🍎</span>macOS
+      </button>
+      <button class="device-button" data-device="ios">
+        <span class="device-icon">📱</span>iPhone/iPad
+      </button>
+      <button class="device-button" data-device="android">
+        <span class="device-icon">🤖</span>Android
+      </button>
+      <button class="device-button" data-device="router">
+        <span class="device-icon">📶</span>Router
+      </button>
+    </div>
+
+    <!-- App Section (Default) -->
+    <div class="device-content active" id="app">
+      <div class="solution-section">
+        <h2 class="section-title">Cloudflare 1.1.1.1 App (Empfohlen)</h2>
+        
+        <div class="app-info">
+          <div class="app-image">
+            <img src="https://1.1.1.1/media/1-1-1-1-app-icon.svg" alt="1.1.1.1 by Cloudflare App">
+          </div>
+          <div class="app-details">
+            <h3 class="app-name">1.1.1.1 by Cloudflare</h3>
+            <p class="app-description">
+              Die einfachste Lösung ist die Installation der kostenlosen App "1.1.1.1" von Cloudflare. Diese App konfiguriert automatisch dein Gerät so, dass es den schnellen und privaten DNS-Dienst von Cloudflare nutzt, was auch hilft, Anbieter-Sperren zu umgehen.
+            </p>
+            <p class="app-description">
+              Die App ist mit nur einem Knopfdruck eingerichtet - keine technischen Kenntnisse erforderlich!
+            </p>
+            <div class="store-buttons">
+              <a href="https://apps.apple.com/de/app/1-1-1-1-faster-internet/id1423538627" class="store-button">
+                <svg class="store-icon" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M12.152 6.896c-.948 0-2.415-1.078-3.96-1.04-2.04.027-3.91 1.183-4.961 3.014-2.117 3.675-.546 9.103 1.519 12.09 1.013 1.454 2.208 3.09 3.792 3.039 1.52-.065 2.09-.987 3.935-.987 1.831 0 2.35.987 3.96.948 1.637-.026 2.676-1.48 3.676-2.948 1.156-1.688 1.636-3.325 1.662-3.415-.039-.013-3.182-1.221-3.22-4.857-.026-3.04 2.48-4.494 2.597-4.559-1.429-2.09-3.623-2.324-4.39-2.376-2-.156-3.675 1.09-4.61 1.09zM15.53 3.83c.843-1.012 1.4-2.427 1.245-3.83-1.207.052-2.662.805-3.532 1.818-.78.896-1.454 2.338-1.273 3.714 1.338.104 2.715-.688 3.559-1.701z" fill="#fff"/></svg>
+                App Store
+              </a>
+              <a href="https://play.google.com/store/apps/details?id=com.cloudflare.onedotonedotonedotone&hl=de" class="store-button">
+                <img src="https://www.gstatic.com/android/market_images/web/play_prism_hlock_2x.png" style="height: 24px; margin-right: 8px;">
+                Google Play
+              </a>
+            </div>
+          </div>
+        </div>
+        
+        <div class="note">
+          <div class="note-title">Hinweis:</div>
+          <p>Die App von Cloudflare ist kostenlos, datenschutzfreundlich und leicht zu verwenden. Sie bietet die einfachste Lösung für die meisten Nutzer und funktioniert auf allen Geräten.</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Windows Section -->
+    <div class="device-content" id="windows">
+      <div class="solution-section">
+        <h2 class="section-title">Windows DNS-Einstellungen ändern</h2>
+        
+        <div class="app-info">
+          <div class="app-image">
+            <img src="https://1.1.1.1/media/1-1-1-1-app-icon.svg" alt="1.1.1.1 by Cloudflare App">
+          </div>
+          <div class="app-details">
+            <h3 class="app-name">Alternative: 1.1.1.1 App für Windows</h3>
+            <p class="app-description">
+              Die einfachste Option ist die Installation der kostenlosen App "1.1.1.1" von Cloudflare. Damit umgehst du manuelle Konfiguration.
+            </p>
+            <div class="store-buttons">
+              <a href="https://1.1.1.1/download/windows/" class="store-button">
+                <svg class="store-icon" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M0 3.449L9.75 2.1v9.451H0m10.949-9.602L24 0v11.4H10.949M0 12.6h9.75v9.451L0 20.699M10.949 12.6H24V24l-12.9-1.801" fill="#fff"/></svg>
+                Windows Download
+              </a>
+            </div>
+          </div>
+        </div>
+        
+        <h3 class="section-title">Manuelle Konfiguration</h3>
+        <ol class="instruction-list">
+          <li>
+            Öffne das Startmenü und gib "Netzwerkeinstellungen" ein.
+          </li>
+          <li>
+            Klicke auf "Netzwerk- und Interneteinstellungen".
+          </li>
+          <li>
+            Klicke auf "Adapteroptionen ändern".
+          </li>
+          <li>
+            Rechtsklick auf die aktive Netzwerkverbindung (WLAN oder Ethernet) und wähle "Eigenschaften".
+          </li>
+          <li>
+            Doppelklick auf "Internetprotokoll Version 4 (TCP/IPv4)".
+          </li>
+          <li>
+            Wähle "Folgende DNS-Serveradressen verwenden" und trage die folgenden Werte ein:
+            <div class="dns-values">
+              <div class="dns-value">
+                <span class="dns-label">Bevorzugter DNS-Server:</span>
+                <span class="dns-address">1.1.1.1</span>
+              </div>
+              <div class="dns-value">
+                <span class="dns-label">Alternativer DNS-Server:</span>
+                <span class="dns-address">1.0.0.1</span>
+              </div>
+            </div>
+          </li>
+          <li>
+            Klicke auf "OK" und schließe alle Fenster.
+          </li>
+          <li>
+            Öffne einen Browser und besuche FilmFrei erneut.
+          </li>
+        </ol>
+      </div>
+    </div>
+
+    <!-- Mac Section -->
+    <div class="device-content" id="mac">
+      <div class="solution-section">
+        <h2 class="section-title">macOS DNS-Einstellungen ändern</h2>
+        
+        <div class="app-info">
+          <div class="app-image">
+            <img src="https://1.1.1.1/media/1-1-1-1-app-icon.svg" alt="1.1.1.1 by Cloudflare App">
+          </div>
+          <div class="app-details">
+            <h3 class="app-name">Alternative: 1.1.1.1 App für macOS</h3>
+            <p class="app-description">
+              Die einfachste Option ist die Installation der kostenlosen App "1.1.1.1" von Cloudflare. Damit umgehst du manuelle Konfiguration.
+            </p>
+            <div class="store-buttons">
+              <a href="https://1.1.1.1/download/mac/" class="store-button">
+                <svg class="store-icon" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M12.152 6.896c-.948 0-2.415-1.078-3.96-1.04-2.04.027-3.91 1.183-4.961 3.014-2.117 3.675-.546 9.103 1.519 12.09 1.013 1.454 2.208 3.09 3.792 3.039 1.52-.065 2.09-.987 3.935-.987 1.831 0 2.35.987 3.96.948 1.637-.026 2.676-1.48 3.676-2.948 1.156-1.688 1.636-3.325 1.662-3.415-.039-.013-3.182-1.221-3.22-4.857-.026-3.04 2.48-4.494 2.597-4.559-1.429-2.09-3.623-2.324-4.39-2.376-2-.156-3.675 1.09-4.61 1.09zM15.53 3.83c.843-1.012 1.4-2.427 1.245-3.83-1.207.052-2.662.805-3.532 1.818-.78.896-1.454 2.338-1.273 3.714 1.338.104 2.715-.688 3.559-1.701z" fill="#fff"/></svg>
+                macOS Download
+              </a>
+            </div>
+          </div>
+        </div>
+        
+        <h3 class="section-title">Manuelle Konfiguration</h3>
+        <ol class="instruction-list">
+          <li>
+            Klicke auf das Apple-Symbol in der Menüleiste und wähle "Systemeinstellungen".
+          </li>
+          <li>
+            Klicke auf "Netzwerk".
+          </li>
+          <li>
+            Wähle deine aktive Netzwerkverbindung (WLAN oder Ethernet) aus.
+          </li>
+          <li>
+            Klicke auf "Weitere Optionen..." oder "Erweitert...".
+          </li>
+          <li>
+            Gehe zum Tab "DNS".
+          </li>
+          <li>
+            Klicke auf das "+"-Symbol unter der DNS-Server-Liste und füge die folgenden Werte hinzu:
+            <div class="dns-values">
+              <div class="dns-value">
+                <span class="dns-label">DNS-Server 1:</span>
+                <span class="dns-address">1.1.1.1</span>
+              </div>
+              <div class="dns-value">
+                <span class="dns-label">DNS-Server 2:</span>
+                <span class="dns-address">1.0.0.1</span>
+              </div>
+            </div>
+          </li>
+          <li>
+            Klicke auf "OK" und dann auf "Anwenden".
+          </li>
+          <li>
+            Öffne einen Browser und besuche FilmFrei erneut.
+          </li>
+        </ol>
+      </div>
+    </div>
+
+    <!-- iOS Section -->
+    <div class="device-content" id="ios">
+      <div class="solution-section">
+        <h2 class="section-title">iOS (iPhone/iPad) DNS-Einstellungen ändern</h2>
+        
+        <div class="app-info">
+          <div class="app-image">
+            <img src="https://1.1.1.1/media/1-1-1-1-app-icon.svg" alt="1.1.1.1 by Cloudflare App">
+          </div>
+          <div class="app-details">
+            <h3 class="app-name">Alternative: 1.1.1.1 App für iOS (Empfohlen)</h3>
+            <p class="app-description">
+              Die einfachste Option ist die Installation der kostenlosen App "1.1.1.1" von Cloudflare. Unter iOS ist dies die empfohlene Methode, da sie wesentlich einfacher ist als die manuelle Konfiguration.
+            </p>
+            <div class="store-buttons">
+              <a href="https://apps.apple.com/de/app/1-1-1-1-faster-internet/id1423538627" class="store-button">
+                <svg class="store-icon" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M12.152 6.896c-.948 0-2.415-1.078-3.96-1.04-2.04.027-3.91 1.183-4.961 3.014-2.117 3.675-.546 9.103 1.519 12.09 1.013 1.454 2.208 3.09 3.792 3.039 1.52-.065 2.09-.987 3.935-.987 1.831 0 2.35.987 3.96.948 1.637-.026 2.676-1.48 3.676-2.948 1.156-1.688 1.636-3.325 1.662-3.415-.039-.013-3.182-1.221-3.22-4.857-.026-3.04 2.48-4.494 2.597-4.559-1.429-2.09-3.623-2.324-4.39-2.376-2-.156-3.675 1.09-4.61 1.09zM15.53 3.83c.843-1.012 1.4-2.427 1.245-3.83-1.207.052-2.662.805-3.532 1.818-.78.896-1.454 2.338-1.273 3.714 1.338.104 2.715-.688 3.559-1.701z" fill="#fff"/></svg>
+                App Store
+              </a>
+            </div>
+          </div>
+        </div>
+        
+        <h3 class="section-title">Manuelle Konfiguration</h3>
+        <ol class="instruction-list">
+          <li>
+            Öffne die "Einstellungen" App.
+          </li>
+          <li>
+            Tippe auf "WLAN".
+          </li>
+          <li>
+            Tippe auf das "i"-Symbol neben deinem verbundenen WLAN-Netzwerk.
+          </li>
+          <li>
+            Scrolle nach unten und tippe auf "DNS konfigurieren".
+          </li>
+          <li>
+            Wähle "Manuell" aus.
+          </li>
+          <li>
+            Wenn bereits DNS-Server aufgelistet sind, lösche diese mit dem "-"-Symbol.
+          </li>
+          <li>
+            Tippe auf "Server hinzufügen" und gib folgende Werte nacheinander ein:
+            <div class="dns-values">
+              <div class="dns-value">
+                <span class="dns-label">DNS-Server 1:</span>
+                <span class="dns-address">1.1.1.1</span>
+              </div>
+              <div class="dns-value">
+                <span class="dns-label">DNS-Server 2:</span>
+                <span class="dns-address">1.0.0.1</span>
+              </div>
+            </div>
+          </li>
+          <li>
+            Tippe auf "Speichern".
+          </li>
+          <li>
+            Öffne einen Browser und besuche FilmFrei erneut.
+          </li>
+        </ol>
+        
+        <div class="note">
+          <div class="note-title">Hinweis:</div>
+          <p>Die manuelle Konfiguration muss für jedes WLAN-Netzwerk separat durchgeführt werden. Für mobile Daten ist dies nicht möglich. Daher ist die 1.1.1.1 App von Cloudflare für iOS-Geräte besonders empfehlenswert.</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Android Section -->
+    <div class="device-content" id="android">
+      <div class="solution-section">
+        <h2 class="section-title">Android DNS-Einstellungen ändern</h2>
+        
+        <div class="app-info">
+          <div class="app-image">
+            <img src="https://1.1.1.1/media/1-1-1-1-app-icon.svg" alt="1.1.1.1 by Cloudflare App">
+          </div>
+          <div class="app-details">
+            <h3 class="app-name">Alternative: 1.1.1.1 App für Android (Empfohlen)</h3>
+            <p class="app-description">
+              Die einfachste Option ist die Installation der kostenlosen App "1.1.1.1" von Cloudflare. Diese funktioniert sowohl im WLAN als auch mit mobilen Daten.
+            </p>
+            <div class="store-buttons">
+              <a href="https://play.google.com/store/apps/details?id=com.cloudflare.onedotonedotonedotone&hl=de" class="store-button">
+                <img src="https://www.gstatic.com/android/market_images/web/play_prism_hlock_2x.png" style="height: 24px; margin-right: 8px;">
+                Google Play
+              </a>
+            </div>
+          </div>
+        </div>
+        
+        <h3 class="section-title">Manuelle Konfiguration (Android 9 oder höher)</h3>
+        <ol class="instruction-list">
+          <li>
+            Öffne die "Einstellungen" App.
+          </li>
+          <li>
+            Tippe auf "Netzwerk & Internet" oder "Verbindungen".
+          </li>
+          <li>
+            Tippe auf "WLAN".
+          </li>
+          <li>
+            Halte deinen aktuellen WLAN-Netzwerknamen gedrückt und wähle "Netzwerk bearbeiten" oder tippe auf das Zahnrad-Symbol.
+          </li>
+          <li>
+            Tippe auf "Erweiterte Optionen" oder scrolle nach unten.
+          </li>
+          <li>
+            Ändere "IP-Einstellungen" zu "Statisch".
+          </li>
+          <li>
+            Scrolle nach unten und gib folgende DNS-Server ein:
+            <div class="dns-values">
+              <div class="dns-value">
+                <span class="dns-label">DNS 1:</span>
+                <span class="dns-address">1.1.1.1</span>
+              </div>
+              <div class="dns-value">
+                <span class="dns-label">DNS 2:</span>
+                <span class="dns-address">1.0.0.1</span>
+              </div>
+            </div>
+          </li>
+          <li>
+            Tippe auf "Speichern".
+          </li>
+          <li>
+            Öffne einen Browser und besuche FilmFrei erneut.
+          </li>
+        </ol>
+        
+        <div class="note">
+          <div class="note-title">Hinweis:</div>
+          <p>Die genauen Schritte können je nach Android-Version und Gerätehersteller variieren. Die 1.1.1.1 App von Cloudflare ist oft die einfachere Lösung für Android-Geräte.</p>
+        </div>
+      </div>
+    </div>
+
+<!-- Router Section -->
+<div class="device-content" id="router">
+  <div class="solution-section">
+    <h2 class="section-title">Router DNS-Einstellungen ändern</h2>
+    
+    <p class="app-description" style="margin-bottom: 20px;">
+      Das Ändern der DNS-Einstellungen auf deinem Router hat den Vorteil, dass alle mit dem Router verbundenen Geräte automatisch die neuen DNS-Server nutzen.
+    </p>
+    
+    <div class="note" style="margin-bottom: 30px;">
+      <div class="note-title">Wichtig:</div>
+      <p>Da es viele verschiedene Router-Modelle gibt, können wir hier nur allgemeine Anweisungen geben. Für genaue Anweisungen zu deinem spezifischen Router-Modell, suche im Internet nach "DNS ändern [Dein Router-Modell]".</p>
+    </div>
+    
+    <h3 class="section-title">Allgemeine Anleitung für Router</h3>
+    <ol class="instruction-list">
+      <li>
+        Öffne einen Webbrowser und gib die IP-Adresse deines Routers in die Adressleiste ein. Häufig verwendete Adressen sind:
+        <div class="dns-values">
+          <div class="dns-value">
+            <span class="dns-label">Fritzbox:</span>
+            <span class="dns-address">192.168.178.1</span>
+          </div>
+          <div class="dns-value">
+            <span class="dns-label">Telekom:</span>
+            <span class="dns-address">192.168.2.1</span>
+          </div>
+          <div class="dns-value">
+            <span class="dns-label">Andere Router:</span>
+            <span class="dns-address">192.168.0.1 oder 192.168.1.1</span>
+          </div>
+        </div>
+      </li>
+      <li>
+        Melde dich mit deinem Router-Benutzernamen und Passwort an (normalerweise auf der Unterseite des Routers zu finden oder in den Unterlagen deines Internetanbieters).
+      </li>
+      <li>
+        Suche nach "DNS-Einstellungen", "WAN-Einstellungen" oder "Internetverbindung" im Router-Menü.
+      </li>
+      <li>
+        Suche nach einer Option wie "DNS-Server manuell festlegen" oder "Benutzerdefinierte DNS-Server".
+      </li>
+      <li>
+        Gib die folgenden DNS-Server ein:
+        <div class="dns-values">
+          <div class="dns-value">
+            <span class="dns-label">Primärer DNS:</span>
+            <span class="dns-address">1.1.1.1</span>
+          </div>
+          <div class="dns-value">
+            <span class="dns-label">Sekundärer DNS:</span>
+            <span class="dns-address">1.0.0.1</span>
+          </div>
+        </div>
+      </li>
+      <li>
+        Speichere die Einstellungen und starte deinen Router neu, falls erforderlich.
+      </li>
+      <li>
+        Nach dem Neustart des Routers, öffne einen Browser und besuche FilmFrei erneut.
+      </li>
+    </ol>
+    
+    <h3 class="section-title">FRITZ!Box spezifische Anleitung</h3>
+    <ol class="instruction-list">
+      <li>
+        Öffne einen Webbrowser und gib "fritz.box" oder "192.168.178.1" in die Adressleiste ein.
+      </li>
+      <li>
+        Melde dich mit deinem FRITZ!Box-Passwort an.
+      </li>
+      <li>
+        Klicke auf "Internet" im Hauptmenü.
+      </li>
+      <li>
+        Klicke auf "Zugangsdaten" im Untermenü.
+      </li>
+      <li>
+        Klicke auf den Reiter "DNS-Server".
+      </li>
+      <li>
+        Wähle "Andere DNS-Server verwenden".
+      </li>
+      <li>
+        Gib folgende DNS-Server ein:
+        <div class="dns-values">
+          <div class="dns-value">
+            <span class="dns-label">Bevorzugter DNS-Server:</span>
+            <span class="dns-address">1.1.1.1</span>
+          </div>
+          <div class="dns-value">
+            <span class="dns-label">Alternativer DNS-Server:</span>
+            <span class="dns-address">1.0.0.1</span>
+          </div>
+        </div>
+      </li>
+      <li>
+        Klicke auf "Übernehmen" und starte die FRITZ!Box neu.
+      </li>
+    </ol>
+  </div>
+</div>
+
+<div class="solution-section">
+      <h2 class="section-title">Warum funktioniert dies?</h2>
+      <p style="margin-bottom: 15px;">
+        Manche Internetanbieter blockieren den Zugriff auf bestimmte Websites, indem sie den Domain-Namen (z.B. filmfrei.github.io) auf eine falsche oder blockierende IP-Adresse umleiten. Indem du die DNS-Server von Cloudflare (1.1.1.1) verwendest, umgehst du diese Blockade.
+      </p>
+      <p style="margin-bottom: 15px;">
+        Cloudflare bietet einen sicheren, schnellen und privaten DNS-Dienst, der keine Websites blockiert und deine Anfragen nicht protokolliert. Dies verbessert nicht nur deine Privatsphäre, sondern kann auch deine Internetgeschwindigkeit erhöhen.
+      </p>
+      <div class="note">
+        <div class="note-title">Wichtig zu wissen:</div>
+        <p>Die Verwendung alternativer DNS-Server ist in Deutschland und den meisten anderen Ländern legal. Du umgehst damit keine Sicherheitsmaßnahmen, sondern änderst lediglich, welcher Dienst deine Domain-Anfragen bearbeitet.</p>
+      </div>
+    </div>
+    
+    <a href="https://filmfrei.github.io" class="back-button">Zurück zu FilmFrei</a>
+  </main>
+
+  <footer>
+    © 2025 FilmFrei – Alle Rechte vorbehalten
+  </footer>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      const deviceButtons = document.querySelectorAll('.device-button');
+      const deviceContents = document.querySelectorAll('.device-content');
+      
+      deviceButtons.forEach(button => {
+        button.addEventListener('click', () => {
+          // Remove active class from all buttons and contents
+          deviceButtons.forEach(btn => btn.classList.remove('active'));
+          deviceContents.forEach(content => content.classList.remove('active'));
+          
+          // Add active class to clicked button
+          button.classList.add('active');
+          
+          // Show corresponding content
+          const deviceId = button.getAttribute('data-device');
+          document.getElementById(deviceId).classList.add('active');
+        });
+      });
+    });
+  </script>
+</body>
+</html>
